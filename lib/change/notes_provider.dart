@@ -66,9 +66,11 @@ class NotesProvider extends ChangeNotifier {
 
   void deleteNote(Note note) async {
     notesCollection.doc(note.id).delete();
-    Reference storageReference =
-        FirebaseStorage.instance.refFromURL(note.imageUrl!);
-    await storageReference.delete();
+    if (note.imageUrl != '') {
+      Reference storageReference =
+          FirebaseStorage.instance.refFromURL(note.imageUrl!);
+      await storageReference.delete();
+    }
     notifyListeners();
   }
 

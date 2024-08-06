@@ -113,12 +113,6 @@ class NoteCard extends StatelessWidget {
                             context: context, title: "Bạn có chắc muốn xóa?") ??
                         false;
                     if (shouldDelete && context.mounted) {
-                      final noteController =
-                          Provider.of<NoteController>(context, listen: false);
-                      if (note.imageUrl != null && note.imageUrl!.isNotEmpty) {
-                        await noteController.deleteImage(
-                            note.imageUrl!, context);
-                      }
                       context
                           .read<NotesProvider>()
                           .deleteNote(note); // Optionally delete th
