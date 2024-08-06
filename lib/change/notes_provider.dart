@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 
 import '../enums/order_option.dart';
@@ -10,7 +11,7 @@ class NotesProvider extends ChangeNotifier {
   }
 
   CollectionReference<Map<String, dynamic>> notesCollection =
-      FirebaseFirestore.instance.collection('tasks');
+      FirebaseFirestore.instance.collection('notes');
 
   void getNotes() {
     notesCollection.snapshots().listen((snapshot) {
@@ -53,6 +54,7 @@ class NotesProvider extends ChangeNotifier {
     final newDoc = notesCollection.doc();
     note.id = newDoc.id;
     newDoc.set(note.toJson());
+    print(note);
     notifyListeners();
   }
 
@@ -62,8 +64,11 @@ class NotesProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void deleteNote(Note note) {
+  void deleteNote(Note note) async {
     notesCollection.doc(note.id).delete();
+    Reference storageReference =
+        FirebaseStorage.instance.refFromURL(note.imageUrl!);
+    await storageReference.delete();
     notifyListeners();
   }
 

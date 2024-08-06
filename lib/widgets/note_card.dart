@@ -6,6 +6,7 @@ import 'package:food_map_app/core/constants.dart';
 import 'package:food_map_app/core/dialogs.dart';
 import 'package:food_map_app/models/note.dart';
 import 'package:food_map_app/pages/detail_note_page.dart';
+import 'package:food_map_app/widgets/custom_text_filed.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -54,47 +55,46 @@ class NoteCard extends StatelessWidget {
               style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
-                  color: Colors.grey),
+                  color: Colors.black),
             ),
             SizedBox(
               height: 5,
             ),
-            // Row(
-            //   children: [
-            //     Container(
-            //       child: Text("testiebfwjheb"),
-            //     )
-            //   ],
-            // ),
             if (isInGrid)
               Expanded(
                 child: Column(
                   children: [
-                    Text(
+                   Text(
                       note.content!,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(color: Colors.grey),
                     ),
-                    if (note.imageUrl != null && note.imageUrl!.isNotEmpty)
-                      Image.network(
-                        note.imageUrl!,
-                        height:50,
-                        width: 50,
-                        fit: BoxFit.cover,
-                        errorBuilder: (BuildContext context, Object exception,
-                            StackTrace? stackTrace) {
-                          return Text('Could not load image');
-                        },
+                    SizedBox(
+                      height: 5,
+                    ),
+                    if (note.imageUrl != '' && note.imageUrl!.isNotEmpty)
+                      Expanded(
+                        child: Image.network(
+                          note.imageUrl!,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                          errorBuilder: (BuildContext context, Object exception,
+                              StackTrace? stackTrace) {
+                            return Text('Could not load image');
+                          },
+                        ),
                       ),
+                    SizedBox(
+                      height: 5,
+                    ),
                   ],
                 ),
               )
             else
-              Text(
-                note.content!,
+              CustomTextWithEllipsis(
+                content: note.content!,
                 maxLines: 3,
-                overflow: TextOverflow.ellipsis,
                 style: TextStyle(color: Colors.grey),
               ),
             Row(
@@ -112,16 +112,23 @@ class NoteCard extends StatelessWidget {
                     final shouldDelete = await showConfirmationDialog(
                             context: context, title: "Bạn có chắc muốn xóa?") ??
                         false;
-
                     if (shouldDelete && context.mounted) {
-                      context.read<NotesProvider>().deleteNote(note);
+                      final noteController =
+                          Provider.of<NoteController>(context, listen: false);
+                      if (note.imageUrl != null && note.imageUrl!.isNotEmpty) {
+                        await noteController.deleteImage(
+                            note.imageUrl!, context);
+                      }
+                      context
+                          .read<NotesProvider>()
+                          .deleteNote(note); // Optionally delete th
                     }
                     ;
                   },
                   child: FaIcon(
                     FontAwesomeIcons.trash,
                     color: Colors.grey,
-                    size: 16,
+                    size: 22,
                   ),
                 )
               ],

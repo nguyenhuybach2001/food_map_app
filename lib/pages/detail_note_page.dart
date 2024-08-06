@@ -117,6 +117,23 @@ class _DetailNotePageState extends State<DetailNotePage> {
           title: Text(widget.isNewFood ? "New food" : "Edit"),
           actions: [
             Selector<NoteController, bool>(
+              selector: (context, newNoteController) =>
+                  newNoteController.readOnly,
+              builder: (context, readOnly, child) => Note_Btn(
+                icon:
+                    readOnly ? FontAwesomeIcons.bookOpen : FontAwesomeIcons.pen,
+                onPressed: () {
+                  newNoteController.readOnly = !readOnly;
+
+                  if (newNoteController.readOnly) {
+                    FocusScope.of(context).unfocus();
+                  } else {
+                    focusNode.requestFocus();
+                  }
+                },
+              ),
+            ),
+            Selector<NoteController, bool>(
               selector: (_, newNoteController) => newNoteController.canSaveNote,
               builder: (_, canSaveNote, __) => Note_Btn(
                 icon: FontAwesomeIcons.check,
@@ -134,53 +151,96 @@ class _DetailNotePageState extends State<DetailNotePage> {
           padding: const EdgeInsets.all(8.0),
           child: Column(
             children: [
-              TextField(
-                controller: titleController,
-                canRequestFocus: true,
-                onChanged: (value) {
-                  newNoteController.title = value;
-                },
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                decoration: InputDecoration(
-                    hintText: "Title here",
-                    border: InputBorder.none,
-                    hintStyle: TextStyle(color: Colors.grey)),
+              Selector<NoteController, bool>(
+                selector: (context, controller) => controller.readOnly,
+                builder: (context, readOnly, child) => TextField(
+                  controller: titleController,
+                  canRequestFocus: true,
+                  onChanged: (value) {
+                    newNoteController.title = value;
+                  },
+                  readOnly: readOnly,
+                  maxLines: null,
+                  focusNode: focusNode,
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  decoration: InputDecoration(
+                      hintText: "Title here",
+                      border: InputBorder.none,
+                      hintStyle: TextStyle(color: Colors.grey)),
+                ),
               ),
               NoteMetadata(note: newNoteController.note),
               Divider(),
               Expanded(
-                child: Column(
-                  children: [
-                    TextField(
-                      onChanged: (value) {
-                        newNoteController.content = value;
-                      },
-                      controller: contentController,
-                      decoration: InputDecoration(
-                        hintText: "Description here",
+                child: Selector<NoteController, bool>(
+                  selector: (_, controller) => controller.readOnly,
+                  builder: (_, readOnly, __) => Column(
+                    children: [
+                      TextField(
+                        onChanged: (value) {
+                          newNoteController.content = value;
+                        },
+                        controller: contentController,
+                        decoration: InputDecoration(
+                          hintText: "Description here",
+                        ),
+                        readOnly: readOnly,
+                        maxLines: null,
                       ),
-                      maxLines: null,
-                    ),
-                    SizedBox(height: 8),
-                    newNoteController.imageUrl == ''
-                        ? TextButton.icon(
-                            icon: Icon(Icons.image),
-                            label: Text('Add Image'),
-                            onPressed: _pickImage,
-                          )
-                        : Column(
-                            children: [
-                              Image.network(
-                                newNoteController.imageUrl,
-                                height: 200,
-                                width: double.infinity,
-                                fit: BoxFit.cover,
-                              ),
-                              SizedBox(height: 8),
-                              // Remove the upload button as the image is uploaded automatically
-                            ],
-                          )
-                  ],
+                      SizedBox(height: 8),
+                      Consumer<NoteController>(
+                        builder: (context, controller, child) {
+                          if (controller.loading) {
+                            return Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(vertical: 32.0),
+                              child: CircularProgressIndicator(),
+                            );
+                          }
+
+                          return controller.imageUrl.isEmpty
+                              ? TextButton.icon(
+                                  icon: Icon(Icons.image),
+                                  label: Text('Add Image'),
+                                  onPressed: _pickImage,
+                                )
+                              : Stack(
+                                  children: [
+                                    Image.network(
+                                      controller.imageUrl,
+                                      height: 200,
+                                      width: double.infinity,
+                                      fit: BoxFit.cover,
+                                    ),
+                                    Positioned(
+                                      right: 4,
+                                      top: 4,
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          color: Colors
+                                              .grey[300], // Background color
+                                          borderRadius:
+                                              BorderRadius.circular(100),
+                                          border: Border.all(
+                                              color: Colors.white, width: 1),
+                                        ),
+                                        child: IconButton(
+                                          icon: Icon(Icons.close,
+                                              size: 22, color: Colors.white),
+                                          onPressed: () {
+                                            controller.deleteImage(
+                                                controller.imageUrl, context);
+                                          },
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(height: 8),
+                                  ],
+                                );
+                        },
+                      )
+                    ],
+                  ),
                 ),
               ),
             ],

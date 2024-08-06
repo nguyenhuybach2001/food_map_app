@@ -18,7 +18,14 @@ class NoteController extends ChangeNotifier {
   }
 
   Note? get note => _note;
-  bool readOnly = false;
+  bool _readOnly = false;
+  set readOnly(bool value) {
+    _readOnly = value;
+    notifyListeners();
+  }
+
+  bool get readOnly => _readOnly;
+
   String _title = '';
   set title(String value) {
     _title = value;
@@ -50,7 +57,7 @@ class NoteController extends ChangeNotifier {
     final String? newContent =
         content.trim().isNotEmpty ? content.trim() : null;
 
-    bool canSave = newTitle != null || newContent != null;
+    bool canSave = newTitle != null || newContent != null || imageUrl != '';
     if (!isNewNote) {
       canSave &= newTitle != note!.title ||
           newContent != note!.content ||
@@ -59,8 +66,17 @@ class NoteController extends ChangeNotifier {
     return canSave;
   }
 
+  bool _loading = false;
+  bool get loading => _loading;
+
+  set loading(bool value) {
+    _loading = value;
+    notifyListeners();
+  }
+
   Future<void> uploadImageToFirebase(File image) async {
     try {
+      loading = true;
       String fileName =
           DateTime.now().millisecondsSinceEpoch.toString() + '.jpg';
       Reference referenceRoot = FirebaseStorage.instance.ref();
@@ -72,6 +88,24 @@ class NoteController extends ChangeNotifier {
       imageUrl = downloadUrl;
     } catch (e) {
       print('Failed to upload image: $e');
+    } finally {
+      loading = false;
+    }
+  }
+
+  Future<void> deleteImage(String image, BuildContext context) async {
+    try {
+      if (image.isNotEmpty) {
+        loading = true;
+        Reference storageReference = FirebaseStorage.instance.refFromURL(image);
+        await storageReference.delete();
+        imageUrl = '';
+        context.read<NotesProvider>().getNotes();
+      }
+    } catch (e) {
+      print('Failed to delete image: $e');
+    } finally {
+      loading = false;
     }
   }
 
@@ -90,7 +124,6 @@ class NoteController extends ChangeNotifier {
       dateModified: now,
       imageUrl: imageUrl, // Thêm trường imageUrl
     );
-
     final notesProvider = context.read<NotesProvider>();
     if (isNewNote) {
       notesProvider.addNote(note);

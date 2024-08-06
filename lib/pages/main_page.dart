@@ -6,7 +6,6 @@ import 'package:food_map_app/change/notes_provider.dart';
 import 'package:food_map_app/core/constants.dart';
 import 'package:food_map_app/models/note.dart';
 import 'package:food_map_app/widgets/no_note.dart';
-// import 'package:food_map_app/pages/detail_note_page.dart';
 import 'package:food_map_app/widgets/note_card.dart';
 import 'package:food_map_app/widgets/note_fab.dart';
 import 'package:food_map_app/widgets/notes_grid.dart';
@@ -53,7 +52,7 @@ class _MainPageState extends State<MainPage> {
           return notes.isEmpty && notesProvider.searchTerm.isEmpty
               ? NoNotes()
               : Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  padding: const EdgeInsets.all(16.0),
                   child: Column(
                     children: [
                       const SearchField(),
