@@ -174,72 +174,74 @@ class _DetailNotePageState extends State<DetailNotePage> {
               Expanded(
                 child: Selector<NoteController, bool>(
                   selector: (_, controller) => controller.readOnly,
-                  builder: (_, readOnly, __) => Column(
-                    children: [
-                      TextField(
-                        onChanged: (value) {
-                          newNoteController.content = value;
-                        },
-                        controller: contentController,
-                        decoration: InputDecoration(
-                          hintText: "Description here",
+                  builder: (_, readOnly, __) => SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        TextField(
+                          onChanged: (value) {
+                            newNoteController.content = value;
+                          },
+                          controller: contentController,
+                          decoration: InputDecoration(
+                            hintText: "Description here",
+                          ),
+                          readOnly: readOnly,
+                          maxLines: null,
                         ),
-                        readOnly: readOnly,
-                        maxLines: null,
-                      ),
-                      SizedBox(height: 8),
-                      Consumer<NoteController>(
-                        builder: (context, controller, child) {
-                          if (controller.loading) {
-                            return Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(vertical: 32.0),
-                              child: CircularProgressIndicator(),
-                            );
-                          }
+                        SizedBox(height: 8),
+                        Consumer<NoteController>(
+                          builder: (context, controller, child) {
+                            if (controller.loading) {
+                              return Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 32.0),
+                                child: CircularProgressIndicator(),
+                              );
+                            }
 
-                          return controller.imageUrl.isEmpty
-                              ? TextButton.icon(
-                                  icon: Icon(Icons.image),
-                                  label: Text('Add Image'),
-                                  onPressed: _pickImage,
-                                )
-                              : Stack(
-                                  children: [
-                                    Image.network(
-                                      controller.imageUrl,
-                                      height: 200,
-                                      width: double.infinity,
-                                      fit: BoxFit.cover,
-                                    ),
-                                    Positioned(
-                                      right: 4,
-                                      top: 4,
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                          color: Colors
-                                              .grey[300], // Background color
-                                          borderRadius:
-                                              BorderRadius.circular(100),
-                                          border: Border.all(
-                                              color: Colors.white, width: 1),
-                                        ),
-                                        child: IconButton(
-                                          icon: Icon(Icons.close,
-                                              size: 22, color: Colors.white),
-                                          onPressed: () {
-                                            controller.deleteImage(
-                                                controller.imageUrl, context);
-                                          },
+                            return controller.imageUrl.isEmpty
+                                ? TextButton.icon(
+                                    icon: Icon(Icons.image),
+                                    label: Text('Add Image'),
+                                    onPressed: _pickImage,
+                                  )
+                                : Stack(
+                                    children: [
+                                      Image.network(
+                                        controller.imageUrl,
+                                        height: 200,
+                                        width: double.infinity,
+                                        fit: BoxFit.cover,
+                                      ),
+                                      Positioned(
+                                        right: 4,
+                                        top: 4,
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            color: Colors
+                                                .grey[300], // Background color
+                                            borderRadius:
+                                                BorderRadius.circular(100),
+                                            border: Border.all(
+                                                color: Colors.white, width: 1),
+                                          ),
+                                          child: IconButton(
+                                            icon: Icon(Icons.close,
+                                                size: 22, color: Colors.white),
+                                            onPressed: () {
+                                              controller.deleteImage(
+                                                  controller.imageUrl, context);
+                                            },
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                    SizedBox(height: 8),
-                                  ],
-                                );
-                        },
-                      )
-                    ],
+                                      SizedBox(height: 8),
+                                    ],
+                                  );
+                          },
+                        )
+                      ],
+                    ),
                   ),
                 ),
               ),

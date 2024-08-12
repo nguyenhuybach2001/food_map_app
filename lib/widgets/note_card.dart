@@ -63,8 +63,9 @@ class NoteCard extends StatelessWidget {
             if (isInGrid)
               Expanded(
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                   Text(
+                    Text(
                       note.content!,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
